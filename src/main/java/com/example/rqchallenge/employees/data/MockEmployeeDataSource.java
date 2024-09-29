@@ -3,7 +3,6 @@ package com.example.rqchallenge.employees.data;
 import com.example.rqchallenge.employees.model.Employee;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Comparator;

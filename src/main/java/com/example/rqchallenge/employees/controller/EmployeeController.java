@@ -2,7 +2,6 @@ package com.example.rqchallenge.employees.controller;
 
 import com.example.rqchallenge.employees.model.Employee;
 import com.example.rqchallenge.employees.service.EmployeeService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -114,7 +113,7 @@ public class EmployeeController implements IEmployeeController {
         try {
             employee = employeeService.createEmployee(name, salary, age);
             logger.info("Created new employee with ID: {}", employee.getId());
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             logger.error("Error occurred while creating employee", e);
             throw new RuntimeException("Failed to create employee", e);
         }

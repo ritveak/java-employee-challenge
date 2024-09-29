@@ -1,8 +1,6 @@
 package com.example.rqchallenge.employees.data;
 
 import com.example.rqchallenge.employees.model.Employee;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -12,6 +10,6 @@ public interface EmployeeDataSource {
     Employee getEmployeeById(String id) throws IOException;
     int getHighestSalaryOfEmployees() throws IOException;
     List<String> getTopTenHighestEarningEmployeeNames() throws IOException;
-    Employee createEmployee(String name, String salary, String age) throws JsonProcessingException;
+    Employee createEmployee(String name, String salary, String age) throws IOException;
     String deleteEmployeeById(String id);
 }

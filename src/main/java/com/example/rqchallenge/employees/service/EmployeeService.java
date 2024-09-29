@@ -2,7 +2,6 @@ package com.example.rqchallenge.employees.service;
 
 import com.example.rqchallenge.employees.data.EmployeeDataSource;
 import com.example.rqchallenge.employees.model.Employee;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ public class EmployeeService {
         return topTen;
     }
 
-    public Employee createEmployee(String name, String salary, String age) throws JsonProcessingException {
+    public Employee createEmployee(String name, String salary, String age) throws IOException {
         logger.info("Creating new employee: name={}, salary={}, age={}", name, salary, age);
         Employee newEmployee = employeeDataSource.createEmployee(name, salary, age);
         logger.info("Created new employee with ID: {}", newEmployee.getId());

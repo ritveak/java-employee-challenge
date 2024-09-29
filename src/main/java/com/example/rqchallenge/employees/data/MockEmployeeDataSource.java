@@ -1,8 +1,9 @@
 package com.example.rqchallenge.employees.data;
 
-
 import com.example.rqchallenge.employees.model.Employee;
-import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MockEmployeeDataSource implements EmployeeDataSource {
+
+    private static final Logger logger = LoggerFactory.getLogger(MockEmployeeDataSource.class);
 
     private List<Employee> employees;
 
@@ -24,6 +27,7 @@ public class MockEmployeeDataSource implements EmployeeDataSource {
         employees.add(createEmployeeObject("3", "Mike Johnson", "55000", "28", ""));
         employees.add(createEmployeeObject("4", "Emily Brown", "80000", "40", ""));
         employees.add(createEmployeeObject("5", "David Lee", "70000", "33", ""));
+        logger.info("Initialized {} employees", employees.size());
     }
 
     private Employee createEmployeeObject(String id, String name, String salary, String age, String profileImage) {
@@ -38,18 +42,23 @@ public class MockEmployeeDataSource implements EmployeeDataSource {
 
     @Override
     public List<Employee> getAllEmployees() {
+        logger.info("Retrieving all employees");
         return new ArrayList<>(employees);
     }
 
     @Override
     public List<Employee> getEmployeesByNameSearch(String searchString) {
-        return employees.stream()
+        logger.info("Searching employees with name containing: {}", searchString);
+        List<Employee> result = employees.stream()
                 .filter(e -> e.getEmployeeName().toLowerCase().contains(searchString.toLowerCase()))
                 .collect(Collectors.toList());
+        logger.info("Found {} employees matching the search", result.size());
+        return result;
     }
 
     @Override
     public Employee getEmployeeById(String id) {
+        logger.info("Retrieving employee with ID: {}", id);
         return employees.stream()
                 .filter(e -> e.getId().equals(id))
                 .findFirst()
@@ -58,32 +67,43 @@ public class MockEmployeeDataSource implements EmployeeDataSource {
 
     @Override
     public int getHighestSalaryOfEmployees() {
-        return employees.stream()
+        logger.info("Calculating highest salary of employees");
+        int highestSalary = employees.stream()
                 .mapToInt(e -> Integer.parseInt(e.getEmployeeSalary()))
                 .max()
                 .orElse(0);
+        logger.info("Highest salary: {}", highestSalary);
+        return highestSalary;
     }
 
     @Override
     public List<String> getTopTenHighestEarningEmployeeNames() {
-        return employees.stream()
+        logger.info("Retrieving top ten highest earning employee names from Mock Data");
+        List<String> topTen = employees.stream()
                 .sorted(Comparator.comparingInt((Employee e) -> Integer.parseInt(e.getEmployeeSalary())).reversed())
                 .limit(10)
                 .map(Employee::getEmployeeName)
                 .collect(Collectors.toList());
+        logger.info("Retrieved {} top earning employee names from Mock Data", topTen.size());
+        return topTen;
     }
 
     @Override
     public Employee createEmployee(String name, String salary, String age) {
+        logger.info("Creating new employee in Mock Data: name={}, salary={}, age={}", name, salary, age);
         String id = String.valueOf(employees.size() + 1);
         Employee newEmployee = createEmployeeObject(id, name, salary, age, "");
         employees.add(newEmployee);
+        logger.info("Created new employee in Mock Data with ID: {}", id);
         return newEmployee;
     }
 
     @Override
     public String deleteEmployeeById(String id) {
+        logger.info("Attempting to delete employee  in Mock Data with ID: {}", id);
         boolean removed = employees.removeIf(e -> e.getId().equals(id));
-        return removed ? "Employee with ID " + id + " was deleted" : "Employee with ID " + id + " not found";
+        String result = removed ? "Employee with ID " + id + " was deleted from Mock Data" : "Employee with ID " + id + " not found in Mock Data";
+        logger.info(result);
+        return result;
     }
 }

@@ -8,7 +8,6 @@ import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +33,7 @@ class EmployeeServiceTest {
         return employee;
     }
     @Test
-    void testGetAllEmployees() throws IOException {
+    void testGetAllEmployees() throws Exception {
         List<Employee> mockEmployees = Arrays.asList(
                 createEmployeeObject("1", "John Doe", "50000", "30", ""),
                 createEmployeeObject("2", "Jane Smith", "60000", "35", "")
@@ -47,8 +46,8 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testGetEmployeesByNameSearch() throws IOException {
-        List<Employee> mockEmployees = Arrays.asList(
+    void testGetEmployeesByNameSearch() throws Exception {
+        List<Employee> mockEmployees = List.of(
                 createEmployeeObject("1", "John Doe", "50000", "30", "")
         );
         when(mockDataSource.getEmployeesByNameSearch("John")).thenReturn(mockEmployees);
@@ -60,7 +59,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testGetEmployeeById() throws IOException {
+    void testGetEmployeeById() throws Exception {
         Employee mockEmployee = createEmployeeObject("1", "John Doe", "50000", "30", "");
         when(mockDataSource.getEmployeeById("1")).thenReturn(mockEmployee);
 
@@ -70,7 +69,7 @@ class EmployeeServiceTest {
         verify(mockDataSource).getEmployeeById("1");
     }
     @Test
-    void testGetEmployeeById_NonExisting() throws IOException {
+    void testGetEmployeeById_NonExisting() throws Exception {
         Employee mockEmployee = createEmployeeObject("1", "John Doe", "50000", "30", "");
         when(mockDataSource.getEmployeeById("1")).thenReturn(mockEmployee);
 
@@ -80,7 +79,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testGetHighestSalaryOfEmployees() throws IOException {
+    void testGetHighestSalaryOfEmployees() throws Exception {
         when(mockDataSource.getHighestSalaryOfEmployees()).thenReturn(100000);
 
         int result = employeeService.getHighestSalaryOfEmployees();
@@ -89,7 +88,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testGetTopTenHighestEarningEmployeeNames() throws IOException {
+    void testGetTopTenHighestEarningEmployeeNames() throws Exception {
         List<String> mockNames = Arrays.asList("John Doe", "Jane Smith");
         when(mockDataSource.getTopTenHighestEarningEmployeeNames()).thenReturn(mockNames);
 
@@ -100,7 +99,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testCreateEmployee() throws IOException {
+    void testCreateEmployee() throws Exception {
         Employee mockEmployee = createEmployeeObject("3", "New Employee", "70000", "40", "");
         when(mockDataSource.createEmployee("New Employee", "70000", "40")).thenReturn(mockEmployee);
 
@@ -111,7 +110,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testDeleteEmployeeById() {
+    void testDeleteEmployeeById() throws Exception {
         when(mockDataSource.deleteEmployeeById("1")).thenReturn("Employee deleted");
 
         String result = employeeService.deleteEmployeeById("1");

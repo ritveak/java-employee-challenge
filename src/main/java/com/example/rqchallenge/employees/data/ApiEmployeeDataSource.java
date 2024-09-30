@@ -1,7 +1,6 @@
 package com.example.rqchallenge.employees.data;
 
 import com.example.rqchallenge.employees.model.Employee;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -13,8 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ApiEmployeeDataSource implements EmployeeDataSource {
@@ -32,7 +34,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public List<Employee> getAllEmployees() throws IOException {
+    public List<Employee> getAllEmployees() throws Exception {
         logger.info("Fetching all employees from API");
         String url = BASE_URL + "/employees";
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
@@ -44,7 +46,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public List<Employee> getEmployeesByNameSearch(String searchString) throws IOException {
+    public List<Employee> getEmployeesByNameSearch(String searchString) throws Exception {
         logger.info("Searching employees with name containing: {}", searchString);
         List<Employee> employees = getAllEmployees();
         List<Employee> filteredEmployees = employees.stream()
@@ -55,7 +57,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public Employee getEmployeeById(String id) throws IOException {
+    public Employee getEmployeeById(String id) throws Exception {
         logger.info("Fetching employee with ID: {} from API", id);
         String url = BASE_URL + "/employee/" + id;
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
@@ -70,7 +72,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public int getHighestSalaryOfEmployees() throws IOException {
+    public int getHighestSalaryOfEmployees() throws Exception {
         logger.info("Calculating highest salary of employees");
         List<Employee> employees = getAllEmployees();
         int highestSalary = employees.stream()
@@ -82,7 +84,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public List<String> getTopTenHighestEarningEmployeeNames() throws IOException {
+    public List<String> getTopTenHighestEarningEmployeeNames() throws Exception {
         logger.info("Retrieving top ten highest earning employee names");
         List<Employee> employees = getAllEmployees();
         List<String> topTen = employees.stream()
@@ -95,7 +97,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public Employee createEmployee(String name, String salary, String age) throws JsonProcessingException {
+    public Employee createEmployee(String name, String salary, String age) throws Exception {
         logger.info("Creating new employee: name={}, salary={}, age={}", name, salary, age);
         String url = BASE_URL + "/create";
         Map<String, String> requestBody = new HashMap<>();
@@ -116,7 +118,7 @@ public class ApiEmployeeDataSource implements EmployeeDataSource {
     }
 
     @Override
-    public String deleteEmployeeById(String id) {
+    public String deleteEmployeeById(String id) throws Exception{
         logger.info("Attempting to delete employee with ID: {}", id);
         String url = BASE_URL + "/delete/" + id;
         restTemplate.delete(url);

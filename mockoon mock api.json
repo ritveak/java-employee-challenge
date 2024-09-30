@@ -1,0 +1,133 @@
+{
+  "uuid": "23478b43-9129-4aa1-9f70-4ce9299965bc",
+  "lastMigration": 32,
+  "name": "Demo API (copy)",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "c6e51eeb-a0ae-4204-94f1-e66740553f89",
+      "type": "http",
+      "documentation": "Generate random body (JSON, text, CSV, etc) with templating",
+      "method": "get",
+      "endpoint": "employees",
+      "responses": [
+        {
+          "uuid": "85457f6a-830d-4ef8-8e8b-83194afd0b63",
+          "body": "{\n            \"status\": \"success\",\n            \"data\": [\n                {\n                \"id\": \"1\",\n                \"employee_name\": \"Tiger Nixon\",\n                \"employee_salary\": \"320800\",\n                \"employee_age\": \"61\",\n                \"profile_image\": \"\"\n                },\n                {\n                \"id\": \"2\",\n                \"employee_name\": \"Ritzd\",\n                \"employee_salary\": \"45800\",\n                \"employee_age\": \"21\",\n                \"profile_image\": \"\"\n                }\n            ]\n        }",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Creates 10 random users, or the amount specified in the 'total' query param",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "d1466de2-3e7f-4562-82b4-500748502d42",
+      "type": "http",
+      "documentation": "Generate random body (JSON, text, CSV, etc) with templating",
+      "method": "get",
+      "endpoint": "employee/3",
+      "responses": [
+        {
+          "uuid": "41bbbc47-b7f5-427e-899d-c00a41f6c498",
+          "body": "{\n            \"status\": \"success\",\n            \"data\":\n                {\n                \"id\": \"3\",\n                \"employee_name\": \"Tiger Nixon\",\n                \"employee_salary\": \"320800\",\n                \"employee_age\": \"61\",\n                \"profile_image\": \"\"\n                }\n        }",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Creates 10 random users, or the amount specified in the 'total' query param",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "c6e51eeb-a0ae-4204-94f1-e66740553f89"
+    },
+    {
+      "type": "route",
+      "uuid": "d1466de2-3e7f-4562-82b4-500748502d42"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [
+    {
+      "uuid": "e90d32d8-d7fc-45ae-8781-b97bd1fcca4e",
+      "id": "36jn",
+      "name": "Users",
+      "documentation": "",
+      "value": "[\n  {{#repeat 50}}\n  {\n    \"id\": \"{{faker 'string.uuid'}}\",\n    \"username\": \"{{faker 'internet.userName'}}\"\n  }\n  {{/repeat}}\n]"
+    }
+  ],
+  "callbacks": []
+}

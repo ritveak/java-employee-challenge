@@ -1,206 +1,242 @@
 package com.example.rqchallenge.employees.data;
 
 import com.example.rqchallenge.employees.model.Employee;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-public class ApiEmployeeDataSourceTest {
+@ExtendWith(MockitoExtension.class)
+class ApiEmployeeDataSourceTest {
 
     @Mock
     private RestTemplate restTemplate;
 
+    @InjectMocks
+    private ApiEmployeeDataSource dataSource;
+
     private ObjectMapper objectMapper;
 
-    private ApiEmployeeDataSource apiEmployeeDataSource;
-
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        apiEmployeeDataSource = new ApiEmployeeDataSource(restTemplate);
+    void setUp() {
         objectMapper = new ObjectMapper();
     }
 
-    // Positive Test Cases
-
     @Test
-    public void getAllEmployees_Success() throws IOException {
-        List<Employee> expectedEmployees = createSampleEmployees();
-        String jsonResponse = objectMapper.writeValueAsString(expectedEmployees);
+    void getAllEmployees_Success() throws Exception {
+        String jsonResponse = "{\"data\":[{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(jsonResponse, HttpStatus.OK));
+        List<Employee> result = dataSource.getAllEmployees();
 
-        List<Employee> actualEmployees = apiEmployeeDataSource.getAllEmployees();
-
-        assertEquals(expectedEmployees, actualEmployees);
-    }
-
-    @Test
-    public void getEmployeesByNameSearch_Success() throws IOException {
-        List<Employee> employees = createSampleEmployees();
-        String searchString = "John";
-
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(employees), HttpStatus.OK));
-
-        List<Employee> filteredEmployees = apiEmployeeDataSource.getEmployeesByNameSearch(searchString);
-
-        assertTrue(filteredEmployees.stream().allMatch(e -> e.getEmployeeName().toLowerCase().contains(searchString.toLowerCase())));
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("John Doe", result.get(0).getEmployeeName());
     }
 
     @Test
-    public void getEmployeeById_Success() throws IOException {
-        Employee expectedEmployee = createSampleEmployees().get(0);
-        String id = expectedEmployee.getId();
+    void getAllEmployees_EmptyResponse() throws Exception {
+        String jsonResponse = "{\"data\":[]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(expectedEmployee), HttpStatus.OK));
+        List<Employee> result = dataSource.getAllEmployees();
 
-        Employee actualEmployee = apiEmployeeDataSource.getEmployeeById(id);
-
-        assertEquals(expectedEmployee, actualEmployee);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void getHighestSalaryOfEmployees_Success() throws IOException {
-        List<Employee> employees = createSampleEmployees();
+    void getAllEmployees_ApiError() {
+        when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(employees), HttpStatus.OK));
-
-        int actualHighestSalary = apiEmployeeDataSource.getHighestSalaryOfEmployees();
-
-        assertEquals("909", actualHighestSalary);
+        assertThrows(Exception.class, () -> dataSource.getAllEmployees());
     }
 
     @Test
-    public void getTopTenHighestEarningEmployeeNames_Success() throws IOException {
-        List<Employee> employees = createSampleEmployees();
+    void getEmployeesByNameSearch_Success() throws Exception {
+        String jsonResponse = "{\"data\":[{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(employees), HttpStatus.OK));
+        List<Employee> result = dataSource.getEmployeesByNameSearch("John");
 
-        List<String> actualTopTen = apiEmployeeDataSource.getTopTenHighestEarningEmployeeNames();
-
-        assertEquals("expectedTopTen", actualTopTen.get(0));
+        assertEquals(1, result.size());
+        assertEquals("John Doe", result.get(0).getEmployeeName());
     }
 
     @Test
-    public void createEmployee_Success() throws IOException, JsonProcessingException {
-        Employee expectedEmployee = createEmployeeObject("1","Test Employee", "100000", "30");
-        String jsonResponse = objectMapper.writeValueAsString(expectedEmployee);
+    void getEmployeesByNameSearch_NoMatch() throws Exception {
+        String jsonResponse = "{\"data\":[{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.postForEntity(anyString(), any(), any())).thenReturn(new ResponseEntity<>(jsonResponse, HttpStatus.CREATED));
+        List<Employee> result = dataSource.getEmployeesByNameSearch("Bob");
 
-        Employee actualEmployee = apiEmployeeDataSource.createEmployee(expectedEmployee.getEmployeeName(), expectedEmployee.getEmployeeSalary(), expectedEmployee.getEmployeeAge());
-
-        assertEquals(expectedEmployee, actualEmployee);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void deleteEmployeeById_Success() {
-        String id = "123";
+    void getEmployeeById_Success() throws Exception {
+        String jsonResponse = "{\"data\":{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        String result = apiEmployeeDataSource.deleteEmployeeById(id);
+        Employee result = dataSource.getEmployeeById("1");
 
-        assertEquals("Employee with ID " + id + " was deleted", result);
-    }
-
-    // Negative Test Cases
-
-    @Test
-    public void getAllEmployees_NetworkError() throws IOException {
-        when(restTemplate.getForEntity(anyString(), any())).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Network error"));
-
-        assertThrows(HttpClientErrorException.class, () -> apiEmployeeDataSource.getAllEmployees());
+        assertNotNull(result);
+        assertEquals("1", result.getId());
+        assertEquals("John Doe", result.getEmployeeName());
     }
 
     @Test
-    public void getEmployeesByNameSearch_EmptyList() throws IOException {
-        List<Employee> employees = new ArrayList<>();
+    void getEmployeeById_NotFound() throws Exception {
+        String jsonResponse = "{\"data\":null}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(employees), HttpStatus.OK));
+        Employee result = dataSource.getEmployeeById("999");
 
-        List<Employee> filteredEmployees = apiEmployeeDataSource.getEmployeesByNameSearch("John");
-
-        assertTrue(filteredEmployees.isEmpty());
+        assertNull(result);
     }
 
     @Test
-    public void getEmployeeById_NotFound() throws IOException {
-        String id = "123";
+    void getEmployeeById_ApiError() {
+        when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
-
-        Employee employee = apiEmployeeDataSource.getEmployeeById(id);
-
-        assertNull(employee);
+        assertThrows(Exception.class, () -> dataSource.getEmployeeById("1"));
     }
 
     @Test
-    public void getHighestSalaryOfEmployees_EmptyList() throws IOException {
-        List<Employee> employees = new ArrayList<>();
+    void getHighestSalaryOfEmployees_Success() throws Exception {
+        String jsonResponse = "{\"data\":[{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(employees), HttpStatus.OK));
+        int result = dataSource.getHighestSalaryOfEmployees();
 
-        int highestSalary = apiEmployeeDataSource.getHighestSalaryOfEmployees();
-
-        assertEquals(0, highestSalary);
+        assertEquals(50000, result);
     }
 
     @Test
-    public void getTopTenHighestEarningEmployeeNames_EmptyList() throws IOException {
-        List<Employee> employees = new ArrayList<>();
+    void getHighestSalaryOfEmployees_NoEmployees() throws Exception {
+        String jsonResponse = "{\"data\":[]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.getForEntity(anyString(), any())).thenReturn(new ResponseEntity<>(objectMapper.writeValueAsString(employees), HttpStatus.OK));
+        int result = dataSource.getHighestSalaryOfEmployees();
 
-        List<String> topTen = apiEmployeeDataSource.getTopTenHighestEarningEmployeeNames();
-
-        assertTrue(topTen.isEmpty());
+        assertEquals(0, result);
     }
 
     @Test
-    public void createEmployee_BadRequest() throws IOException, JsonProcessingException {
-        Employee invalidEmployee = createEmployeeObject("","", "", "");
+    void getTopTenHighestEarningEmployeeNames_Success() throws Exception {
+        String jsonResponse = "{\"data\":[" +
+                "{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}," +
+                "{\"id\":\"2\",\"employee_name\":\"Bob Johnson\",\"employee_salary\":\"60000\",\"employee_age\":\"40\",\"profile_image\":\"\"}," +
+                "{\"id\":\"3\",\"employee_name\":\"Jane Smith\",\"employee_salary\":\"70000\",\"employee_age\":\"50\",\"profile_image\":\"\"}" +
+                "]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        when(restTemplate.postForEntity(anyString(), any(), any())).thenReturn(new ResponseEntity<>(null, HttpStatus.BAD_REQUEST));
+        List<String> result = dataSource.getTopTenHighestEarningEmployeeNames();
 
-        assertThrows(HttpClientErrorException.class, () -> apiEmployeeDataSource.createEmployee(invalidEmployee.getEmployeeName(), invalidEmployee.getEmployeeSalary(), invalidEmployee.getEmployeeAge()));
+        assertEquals(3, result.size());
+        assertEquals("Jane Smith", result.get(0));
+        assertEquals("Bob Johnson", result.get(1));
+        assertEquals("John Doe", result.get(2));
     }
 
     @Test
-    public void deleteEmployeeById_NotFound() {
-        String id = "123";
+    void getTopTenHighestEarningEmployeeNames_LessThanTen() throws Exception {
+        String jsonResponse = "{\"data\":[" +
+                "{\"id\":\"1\",\"employee_name\":\"John Doe\",\"employee_salary\":\"50000\",\"employee_age\":\"30\",\"profile_image\":\"\"}," +
+                "{\"id\":\"2\",\"employee_name\":\"Bob Johnson\",\"employee_salary\":\"60000\",\"employee_age\":\"40\",\"profile_image\":\"\"}," +
+                "{\"id\":\"3\",\"employee_name\":\"Jane Smith\",\"employee_salary\":\"74000\",\"employee_age\":\"50\",\"profile_image\":\"\"}," +
+                "{\"id\":\"4\",\"employee_name\":\"Jade Smith\",\"employee_salary\":\"345333\",\"employee_age\":\"50\",\"profile_image\":\"\"}," +
+                "{\"id\":\"5\",\"employee_name\":\"Jack Smith\",\"employee_salary\":\"54000\",\"employee_age\":\"50\",\"profile_image\":\"\"}," +
+                "{\"id\":\"6\",\"employee_name\":\"Smith\",\"employee_salary\":\"80000\",\"employee_age\":\"50\",\"profile_image\":\"\"}," +
+                "{\"id\":\"7\",\"employee_name\":\"T Smith\",\"employee_salary\":\"78000\",\"employee_age\":\"50\",\"profile_image\":\"\"}," +
+                "{\"id\":\"8\",\"employee_name\":\"Kabe Smith\",\"employee_salary\":\"23000\",\"employee_age\":\"23\",\"profile_image\":\"\"}," +
+                "{\"id\":\"9\",\"employee_name\":\"Jacob Smith\",\"employee_salary\":\"23400\",\"employee_age\":\"24\",\"profile_image\":\"\"}," +
+                "{\"id\":\"10\",\"employee_name\":\"Amit\",\"employee_salary\":\"90000\",\"employee_age\":\"34\",\"profile_image\":\"\"}," +
+                "{\"id\":\"11\",\"employee_name\":\"Anjani Smith\",\"employee_salary\":\"120000\",\"employee_age\":\"50\",\"profile_image\":\"\"}" +
+                "]}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(responseEntity);
 
-        assertThrows(HttpClientErrorException.class, () -> apiEmployeeDataSource.deleteEmployeeById(id));
+
+        List<String> result = dataSource.getTopTenHighestEarningEmployeeNames();
+
+        assertEquals(10, result.size());
+        assertEquals("Jade Smith", result.get(0));
+        assertEquals("Anjani Smith", result.get(1));
+        assertEquals("Amit", result.get(2));
+        assertEquals("Smith", result.get(3));
+        assertEquals("T Smith", result.get(4));
+        assertEquals("Jane Smith", result.get(5));
+        assertEquals("Bob Johnson", result.get(6));
+        assertEquals("Jack Smith", result.get(7));
+        assertEquals("John Doe", result.get(8));
+        assertEquals("Jacob Smith", result.get(9));
     }
 
-    // Helper Methods
+    @Test
+    void createEmployee_Success() throws Exception {
+        String jsonResponse = "{\"data\":{\"id\":\"3\",\"employee_name\":\"Alice Brown\",\"employee_salary\":\"70000\",\"employee_age\":\"28\",\"profile_image\":\"\"}}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenReturn(responseEntity);
 
-    private List<Employee> createSampleEmployees() {
-        List<Employee> employees = new ArrayList<>();
-        employees.add(createEmployeeObject("1","John Doe", "50000", "30"));
-        employees.add(createEmployeeObject("1","Jane Smith", "60000", "25"));
-        employees.add(createEmployeeObject("1","Mike Johnson", "70000", "35"));
-        return employees;
+        Employee result = dataSource.createEmployee("Alice Brown", "70000", "28");
+
+        assertNotNull(result);
+        assertEquals("3", result.getId());
+        assertEquals("Alice Brown", result.getEmployeeName());
+        assertEquals("70000", result.getEmployeeSalary());
+        assertEquals("28", result.getEmployeeAge());
     }
 
-    private Employee createEmployeeObject(String id, String name, String salary, String age) {
-        Employee employee = new Employee();
-        employee.setId(id);
-        employee.setEmployeeName(name);
-        employee.setEmployeeSalary(salary);
-        employee.setEmployeeAge(age);
-        return employee;
+    @Test
+    void createEmployee_ApiError() {
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        assertThrows(Exception.class, () -> dataSource.createEmployee("Alice Brown", "70000", "28"));
     }
+
+    @Test
+    void deleteEmployeeById_Success() throws Exception {
+        doNothing().when(restTemplate).delete(anyString());
+
+        String result = dataSource.deleteEmployeeById("1");
+
+        assertEquals("Employee with ID 1 was deleted", result);
+        verify(restTemplate, times(1)).delete(anyString());
+    }
+
+    @Test
+    void deleteEmployeeById_ApiError() {
+        doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
+                .when(restTemplate).delete(anyString());
+
+        assertThrows(Exception.class, () -> dataSource.deleteEmployeeById("999"));
+    }
+
+
 }

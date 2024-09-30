@@ -10,7 +10,6 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        // Ensure there's a valid pattern parser or set to null to use default
-        configurer.setPatternParser(null);  // Use the default AntPathMatcher
+        configurer.setPatternParser(null);
     }
 }

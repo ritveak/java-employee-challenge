@@ -1,5 +1,6 @@
 package com.example.rqchallenge.employees.controller;
 
+import com.example.rqchallenge.employees.controller.exception.EmployeeServiceException;
 import com.example.rqchallenge.employees.model.Employee;
 import com.example.rqchallenge.employees.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ class EmployeeControllerTest {
         return employee;
     }
     @Test
-    void testGetAllEmployees_Success() throws IOException {
+    void testGetAllEmployees_Success() throws Exception {
         List<Employee> mockEmployees = Arrays.asList(
                 createEmployeeObject("1", "John Doe", "50000", "30", ""),
                 createEmployeeObject("2", "Jane Smith", "60000", "35", "")
@@ -53,7 +54,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetAllEmployees_Exception() throws IOException {
+    void testGetAllEmployees_Exception() throws Exception {
         when(mockEmployeeService.getAllEmployees()).thenThrow(new IOException("API Error"));
 
         assertThrows(RuntimeException.class, () -> employeeController.getAllEmployees());
@@ -61,7 +62,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetEmployeesByNameSearch_Success() throws IOException {
+    void testGetEmployeesByNameSearch_Success() throws Exception {
         List<Employee> mockEmployees = Arrays.asList(
                 createEmployeeObject("1", "John Doe", "50000", "30", "")
         );
@@ -75,7 +76,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetEmployeesByNameSearch_Exception() throws IOException {
+    void testGetEmployeesByNameSearch_Exception() throws Exception {
         when(mockEmployeeService.getEmployeesByNameSearch("John")).thenThrow(new IOException("Search Error"));
 
         assertThrows(RuntimeException.class, () -> employeeController.getEmployeesByNameSearch("John"));
@@ -83,19 +84,20 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetEmployeeById_Success() throws IOException {
-        Employee mockEmployee = createEmployeeObject("1", "John Doe", "50000", "30", "");
+    void testGetEmployeeById_Success() throws Exception {
+        Employee mockEmployee = createEmployeeObject("1", "John Doe", "50000", "30", "imageUrl");
         when(mockEmployeeService.getEmployeeById("1")).thenReturn(mockEmployee);
 
         ResponseEntity<Employee> response = employeeController.getEmployeeById("1");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("John Doe", response.getBody().getEmployeeName());
+        assertEquals("imageUrl", response.getBody().getProfileImage());
         verify(mockEmployeeService).getEmployeeById("1");
     }
 
     @Test
-    void testGetEmployeeById_NotFound() throws IOException {
+    void testGetEmployeeById_NotFound() throws Exception {
         when(mockEmployeeService.getEmployeeById("999")).thenReturn(null);
 
         ResponseEntity<Employee> response = employeeController.getEmployeeById("999");
@@ -105,7 +107,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetEmployeeById_Exception() throws IOException {
+    void testGetEmployeeById_Exception() throws Exception {
         when(mockEmployeeService.getEmployeeById("1")).thenThrow(new IOException("Fetch Error"));
 
         assertThrows(RuntimeException.class, () -> employeeController.getEmployeeById("1"));
@@ -113,7 +115,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetHighestSalaryOfEmployees_Success() throws IOException {
+    void testGetHighestSalaryOfEmployees_Success() throws Exception {
         when(mockEmployeeService.getHighestSalaryOfEmployees()).thenReturn(100000);
 
         ResponseEntity<Integer> response = employeeController.getHighestSalaryOfEmployees();
@@ -123,7 +125,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetHighestSalaryOfEmployees_Exception() throws IOException {
+    void testGetHighestSalaryOfEmployees_Exception() throws Exception {
         when(mockEmployeeService.getHighestSalaryOfEmployees()).thenThrow(new IOException("Salary Error"));
 
         assertThrows(RuntimeException.class, () -> employeeController.getHighestSalaryOfEmployees());
@@ -131,7 +133,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetTopTenHighestEarningEmployeeNames_Success() throws IOException {
+    void testGetTopTenHighestEarningEmployeeNames_Success() throws Exception {
         List<String> mockNames = Arrays.asList("John Doe", "Jane Smith");
         when(mockEmployeeService.getTopTenHighestEarningEmployeeNames()).thenReturn(mockNames);
 
@@ -143,7 +145,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testGetTopTenHighestEarningEmployeeNames_Exception() throws IOException {
+    void testGetTopTenHighestEarningEmployeeNames_Exception() throws Exception {
         when(mockEmployeeService.getTopTenHighestEarningEmployeeNames()).thenThrow(new IOException("Top Earners Error"));
 
         assertThrows(RuntimeException.class, () -> employeeController.getTopTenHighestEarningEmployeeNames());
@@ -151,7 +153,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testCreateEmployee_Success() throws IOException {
+    void testCreateEmployee_Success() throws Exception {
         Employee mockEmployee = createEmployeeObject("3", "New Employee", "70000", "40", "");
         when(mockEmployeeService.createEmployee("New Employee", "70000", "40")).thenReturn(mockEmployee);
 
@@ -168,7 +170,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testCreateEmployee_Exception() throws IOException {
+    void testCreateEmployee_Exception() throws Exception {
         Map<String, Object> employeeInput = new HashMap<>();
         employeeInput.put("name", "New Employee");
         employeeInput.put("salary", "70000");
@@ -181,7 +183,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testDeleteEmployeeById_Success() {
+    void testDeleteEmployeeById_Success() throws Exception {
         when(mockEmployeeService.deleteEmployeeById("1")).thenReturn("Employee deleted");
 
         ResponseEntity<String> response = employeeController.deleteEmployeeById("1");
@@ -191,12 +193,10 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void testDeleteEmployeeById_NotFound() {
-        when(mockEmployeeService.deleteEmployeeById("999")).thenReturn("Employee not found");
+    void testDeleteEmployeeById_NotFound() throws Exception{
+        when(mockEmployeeService.deleteEmployeeById("999")).thenThrow(new Exception());
 
-        ResponseEntity<String> response = employeeController.deleteEmployeeById("999");
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("\"Employee not found\"", response.getBody());
+        assertThrows(EmployeeServiceException.class, () -> employeeController.deleteEmployeeById("999"));
         verify(mockEmployeeService).deleteEmployeeById("999");
     }
 }

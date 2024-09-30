@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -22,21 +21,21 @@ public class EmployeeService {
         this.employeeDataSource = employeeDataSource;
     }
 
-    public List<Employee> getAllEmployees() throws IOException {
+    public List<Employee> getAllEmployees() throws Exception {
         logger.info("Fetching all employees");
         List<Employee> employees = employeeDataSource.getAllEmployees();
         logger.info("Retrieved {} employees", employees.size());
         return employees;
     }
 
-    public List<Employee> getEmployeesByNameSearch(String searchString) throws IOException {
+    public List<Employee> getEmployeesByNameSearch(String searchString) throws Exception {
         logger.info("Searching employees with name containing: {}", searchString);
         List<Employee> employees = employeeDataSource.getEmployeesByNameSearch(searchString);
         logger.info("Found {} employees matching the search", employees.size());
         return employees;
     }
 
-    public Employee getEmployeeById(String id) throws IOException {
+    public Employee getEmployeeById(String id) throws Exception {
         logger.info("Fetching employee with ID: {}", id);
         Employee employee = employeeDataSource.getEmployeeById(id);
         if (employee != null) {
@@ -47,28 +46,28 @@ public class EmployeeService {
         return employee;
     }
 
-    public int getHighestSalaryOfEmployees() throws IOException {
+    public int getHighestSalaryOfEmployees() throws Exception {
         logger.info("Calculating highest salary of employees");
         int highestSalary = employeeDataSource.getHighestSalaryOfEmployees();
         logger.info("Highest salary: {}", highestSalary);
         return highestSalary;
     }
 
-    public List<String> getTopTenHighestEarningEmployeeNames() throws IOException {
+    public List<String> getTopTenHighestEarningEmployeeNames() throws Exception {
         logger.info("Retrieving top ten highest earning employee names");
         List<String> topTen = employeeDataSource.getTopTenHighestEarningEmployeeNames();
         logger.info("Retrieved {} top earning employee names", topTen.size());
         return topTen;
     }
 
-    public Employee createEmployee(String name, String salary, String age) throws IOException {
+    public Employee createEmployee(String name, String salary, String age) throws Exception {
         logger.info("Creating new employee: name={}, salary={}, age={}", name, salary, age);
         Employee newEmployee = employeeDataSource.createEmployee(name, salary, age);
         logger.info("Created new employee with ID: {}", newEmployee.getId());
         return newEmployee;
     }
 
-    public String deleteEmployeeById(String id) {
+    public String deleteEmployeeById(String id) throws Exception {
         logger.info("Attempting to delete employee with ID: {}", id);
         String result = employeeDataSource.deleteEmployeeById(id);
         logger.info(result);

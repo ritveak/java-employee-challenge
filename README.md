@@ -1,5 +1,6 @@
 # My solution has below salient features
 - 100% code coverage.
+- Proper class wise logging for easy tracking.
 - Swagger UI implementation for easy api testing using UI and documentation.
 - Global Exception handling using custom exception to properly send error messages in case of failed requests.
 - Mock profile support to get mocked data from code.

@@ -6,6 +6,7 @@ import com.example.rqchallenge.employees.model.Employee;
 import com.example.rqchallenge.employees.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -118,7 +119,7 @@ public class EmployeeController implements IEmployeeController {
             logger.error("Error occurred while creating employee", e);
             throw new EmployeeServiceException("Failed to create employee", e);
         }
-        return ResponseEntity.ok(employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
     @Override

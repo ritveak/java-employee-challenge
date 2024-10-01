@@ -163,7 +163,7 @@ class EmployeeControllerTest {
         employeeInput.put("age", "40");
 
         ResponseEntity<Employee> response = employeeController.createEmployee(employeeInput);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("New Employee", response.getBody().getEmployeeName());
         verify(mockEmployeeService).createEmployee("New Employee", "70000", "40");
